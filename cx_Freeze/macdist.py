@@ -3,6 +3,7 @@ import os
 import plistlib
 import stat
 import subprocess
+import sys
 
 from cx_Freeze.common import normalize_to_list
 
@@ -171,6 +172,25 @@ class bdist_mac(Command):
                 if (name not in files and not path.startswith('/usr') and not
                         path.startswith('/System')):
                     print(referencedFile)
+                    # added by Fred to solve the mac python @rpath replace
+                    # issue here
+                    if referencedFile.startswith('@rpath'):
+                        reftempFile = referencedFile.replace('@rpath/', '')
+                        if fileName == reftempFile:
+                            continue
+                        refFile = os.path.basename(referencedFile)
+                        referencedFile = sys.prefix + '/lib/' + refFile
+                        if not os.path.exists(referencedFile):
+                            if reftempFile in files:
+                                newReference = '@executable_path/' + name
+                                subprocess.call(('install_name_tool',
+                                    '-change',
+                                    reftempFile,
+                                    newReference, filePath))
+                                continue
+                            else:
+                                continue
+
                     self.copy_file(referencedFile,
                                    os.path.join(self.binDir, name))
                     files.append(name)

@@ -168,6 +168,10 @@ class Freezer(object):
 
     def _CopyFile(self, source, target, copyDependentFiles,
             includeMode = False):
+        # added by Fred to fix a not exist bug
+        if not os.path.exists(source):
+            return
+
         normalizedSource = os.path.normcase(os.path.normpath(source))
         normalizedTarget = os.path.normcase(os.path.normpath(target))
         if normalizedTarget in self.filesCopied:
@@ -322,8 +326,15 @@ class Freezer(object):
                     dirname = os.path.dirname(path)
                     dependentFiles = [p.replace('@loader_path', dirname)
                                       for p in dependentFiles]
-                    dependentFiles = [p.replace('@rpath', sys.prefix + '/lib')
-                                      for p in dependentFiles]
+                    # dependentFiles = [p.replace('@rpath', sys.prefix + '/lib')
+                    #                  for p in dependentFiles]
+
+                    # added by Fred to fix the @rpath issue
+                    sysPrefix = sys.prefix
+                    for count in range(3):
+                        sysPrefix = os.path.dirname(sysPrefix)
+                    dependentFiles = [p.replace('@rpath', sysPrefix) for p in dependentFiles]
+
             dependentFiles = self.dependentFiles[path] = \
                     [f for f in dependentFiles if self._ShouldCopyFile(f)]
         return dependentFiles
