@@ -82,6 +82,7 @@ class build_ext(distutils.command.build_ext.build_ext):
         else:
             vars = distutils.sysconfig.get_config_vars()
             libraryDirs.append(vars["LIBPL"])
+            libraryDirs.append("/Volumes/Data/3P/PYTHON/3.7.3/MAC64/Frameworks/Release/Python.framework/Versions/3.7/lib/python3.7/config-3.7m-darwin")
             abiflags = getattr(sys, "abiflags", "")
             libraries.append("python%s.%s%s" % \
                     (sys.version_info[0], sys.version_info[1], abiflags))
