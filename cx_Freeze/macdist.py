@@ -171,16 +171,16 @@ class bdist_mac(Command):
                 #/opt this fix should probably be elsewhere though
                 if (name not in files and not path.startswith('/usr') and not
                         path.startswith('/System')):
-                    print(referencedFile)
                     # added by Fred to solve the mac python @rpath replace
                     # issue here
-                    if referencedFile.startswith('@rpath'):
-                        reftempFile = referencedFile.replace('@rpath/', '')
+                    my_referenced_file = referencedFile
+                    if my_referenced_file.startswith('@rpath'):
+                        reftempFile = my_referenced_file.replace('@rpath/', '')
                         if fileName == reftempFile:
                             continue
-                        refFile = os.path.basename(referencedFile)
-                        referencedFile = sys.prefix + '/lib/' + refFile
-                        if not os.path.exists(referencedFile):
+                        refFile = os.path.basename(my_referenced_file)
+                        my_referenced_file = sys.prefix + '/lib/' + refFile
+                        if not os.path.exists(my_referenced_file):
                             if reftempFile in files:
                                 newReference = '@executable_path/' + name
                                 subprocess.call(('install_name_tool',
@@ -191,7 +191,7 @@ class bdist_mac(Command):
                             else:
                                 continue
 
-                    self.copy_file(referencedFile,
+                    self.copy_file(my_referenced_file,
                                    os.path.join(self.binDir, name))
                     files.append(name)
 
